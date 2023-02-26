@@ -11,7 +11,7 @@ namespace WebApiPractica.Controllers
     {
         private readonly equiposContext _equiposContexto;
 
-        public equiposController(equiposContext equiposContexto) 
+        public equiposController(equiposContext equiposContexto)
         {
             _equiposContexto = equiposContexto; ;
         }
@@ -22,14 +22,47 @@ namespace WebApiPractica.Controllers
         public IActionResult Get()
         {
             List<equipos> listadoEquipo = (from e in _equiposContexto.equipos
-                                          select e).ToList();
-           
+                                           select e).ToList();
 
             if (listadoEquipo.Count == 0)
             {
                 return NotFound();
             }
             return Ok(listadoEquipo);
+
+        }
+
+        [HttpGet]
+        [Route("GetById/{id}")]
+
+        public IActionResult Get(int id)
+        {
+            equipos? equipo = (from e in _equiposContexto.equipos
+                               where e.id_equipos == id
+                               select e).FirstOrDefault();
+
+            if (equipo == null)
+            {
+                return NotFound();
+            }
+            return Ok(equipo);
+
+        }
+        [HttpGet]
+        [Route("Find/{filtro}")]
+
+        public IActionResult FindbyDescription(String filtro)
+        {
+            equipos? equipo = (from e in _equiposContexto.equipos
+                               where e.descripcion.Contains(filtro)
+                               select e).FirstOrDefault();
+
+            if (equipo == null)
+            {
+                return NotFound();
+            }
+            return Ok(equipo);
         }
     }
+  
 }
