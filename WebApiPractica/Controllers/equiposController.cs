@@ -14,23 +14,43 @@ namespace WebApiPractica.Controllers
 
         public equiposController(equiposContext equiposContexto)
         {
-            _equiposContexto = equiposContexto; ;
+            _equiposContexto = equiposContexto; 
         }
 
         [HttpGet]
         [Route("GetAll")]
 
-        public IActionResult Get()
+        public IActionResult GetAll()
         {
-            List<equipos> listadoEquipo = (from e in _equiposContexto.equipos
-                                           select e).ToList();
+            //var marca= (from m in _equiposContexto.marcas
+            //            where m.estados == "A"
+            //            select m).ToList();
 
-            if (listadoEquipo.Count == 0)
+
+
+            var ListaEquipos = (from e in _equiposContexto.equipos
+                                join m in _equiposContexto.marcas on e.marca_id equals m.id_marcas
+                                join te in _equiposContexto.tipo_equipo on e.tipo_equipo_id equals te.id_tipo_equipo
+                                where e.estado == "A"
+                                select new
+                                {
+                                    e.id_equipos,
+                                    e.nombre,
+                                    e.descripcion,
+                                    e.tipo_equipo_id,
+                                    tipo_descripcion = te.descripcion,
+                                    e.marca_id,
+                                    m.nombre_marca,
+                                }
+                                ).ToList();
+
+            if (ListaEquipos == null)
             {
                 return NotFound();
             }
-            return Ok(listadoEquipo);
+           
 
+            return Ok(ListaEquipos);
         }
 
         [HttpGet]
@@ -113,7 +133,7 @@ namespace WebApiPractica.Controllers
         [HttpDelete]
         [Route("eliminar/{id}")]
 
-        public IActionResult EliminarEquipo(int id)
+        public IActionResult InactividadEquipo(int id)
         {
 
             equipos? equipo = (from e in _equiposContexto.equipos
@@ -123,9 +143,31 @@ namespace WebApiPractica.Controllers
             if (equipo == null)
                 return NotFound();
 
-            _equiposContexto.equipos.Attach(equipo);
-            _equiposContexto.equipos.Remove(equipo);
-            _equiposContexto.SaveChanges();
+            equipo.estado = "I";
+
+            _equiposContexto.Entry(equipo).State = EntityState.Modified;
+            _equiposContexto.SaveChanges(true);
+
+            return Ok(equipo);
+        }
+
+        [HttpDelete]
+        [Route("Activar")]
+
+        public IActionResult ActivarEquipo(int id)
+        {
+
+            equipos? equipo = (from e in _equiposContexto.equipos
+                               where e.id_equipos == id
+                               select e).FirstOrDefault();
+
+            if (equipo == null)
+                return NotFound();
+
+            equipo.estado = "A";
+
+            _equiposContexto.Entry(equipo).State = EntityState.Modified;
+            _equiposContexto.SaveChanges(true);
 
             return Ok(equipo);
         }
