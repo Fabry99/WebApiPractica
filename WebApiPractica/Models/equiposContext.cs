@@ -18,5 +18,13 @@ namespace WebApiPractica.Models
 
         public DbSet<estados_reserva> estados_reservas {get; set; }
 
+        public DbSet<carreras> carreras { get; set; }
+
+        public DbSet<facultades>facultades { get; set;}
+
+        public DbSet<reservas> reservas { get; set; }
+
+        public DbSet<usuarios>usuarios { get; set; }
+
     }
 }
